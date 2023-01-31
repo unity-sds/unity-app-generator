@@ -1,0 +1,5 @@
+GitPython
+docker
+jsonschema
+papermill
+jupyter-repo2docker

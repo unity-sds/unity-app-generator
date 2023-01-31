@@ -1,0 +1,8 @@
+# Temporary files
+*.swp
+
+# Build directory
+build/
+
+# Virtual Environment
+env/
