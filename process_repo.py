@@ -1,7 +1,7 @@
 import os
 import sys
 
-from app_pack_generator.parser import GitHelper, DockerUtil, AppNB, Util
+from app_pack_generator import GitHelper, DockerUtil, AppNB
 
 def main(args):
 
@@ -39,6 +39,4 @@ def main(args):
     return return_code
 
 if __name__ == '__main__':
-    time_ms, ret = Util.TimeFunction(main, sys.argv)
-    print('Execution Time:', time_ms, 'ms (returned', str(ret) + ')')
-    exit(ret)
+    ret = main(sys.argv)
