@@ -1,6 +1,0 @@
-[submodule "app-pack-generator"]
-	path = app-pack-generator
-	url = git@github.com:unity-sds/app-pack-generator.git
-[submodule "app_pack_generator"]
-	path = app_pack_generator
-	url = git@github.com:unity-sds/app-pack-generator.git

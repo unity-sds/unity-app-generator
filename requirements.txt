@@ -1,5 +1,1 @@
-GitPython
-docker
-jsonschema
-papermill
-jupyter-repo2docker
+app_pack_generator @ git+https://github.com/unity-sds/app-pack-generator.git
