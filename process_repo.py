@@ -31,6 +31,9 @@ def main(args):
     #dockerurl = docker_util.PushImage(image_tag, docker_registry)
 
     # Generate CWL artifacts within the output directory.
+    if not os.path.exists(cwl_dir):
+        os.makedirs(cwl_dir)
+
     nb = AppNB(repo)
     files = nb.Generate(cwl_dir, dockerurl)
 
