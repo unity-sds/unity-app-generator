@@ -1,47 +1,57 @@
 #!/usr/bin/env python3
+# 
+# *** Unity Application Package Generator ***
+#
+# Builds an OGC compliant appplication using the Unity application interface.
+# A Papermill parameterized Jupyter notebook is introspected to determine
+# input and output paramters that are connected through CWL. This software uses
+# the app-pack-generator as well as Unity.py.
+#
+# This software performs the following steps:
+# * Builds a Docker image using repo2docker 
+# * Pushes the Docker image into a container registry
+# * Creates CWL files from application metadata and Docker registry URL
+# * Register application and pushes CWL files into Dockstore
 
-import os
-import sys
+import logging
+from argparse import ArgumentParser
 
-from app_pack_generator import GitHelper, DockerUtil, AppNB
+from unity_app_generator.generator import UnityApplicationGenerator
 
-def main(args):
+logger = logging.getLogger()
 
-    # Performs the following steps:
-    # * Pushes a copy of source Git repo into Unity Gitlab for storage
-    # * Builds a Docker image using repo2docker 
-    # * Pushes Docker image into a container registry
-    # * Creates CWL files from application metadata and Docker registry URL
-    # * Register application with Dockstore
-    # * Submits CWL files to Dockstore
+def main():
 
-    source_repo = args[1]
-    build_dir = args[2]
+    parser = ArgumentParser(description="Unity Application Package Generator")
 
-    repo_dir = os.path.realpath(os.path.join(build_dir, "application_repo"))
-    cwl_dir = os.path.realpath(os.path.join(build_dir, "cwl"))
+    parser.add_argument("source_repository", 
+        help="Directory or Git URL of application source files")
 
-    # Check out original repository
-    repo = GitHelper(source_repo, dst=repo_dir)
-    #repo.Checkout(checkout)
-    os.chdir(repo_dir)
+    parser.add_argument("-b", "--build_directory", required=False,
+        help="Location where temporary files are staged, if not supplied a system temporary directory is used")
 
-    # Create Docker image
-    docker_util = DockerUtil(repo, do_prune=False)
-    image_tag = docker_util.Repo2Docker()
-    dockerurl = image_tag
-    #dockerurl = docker_util.PushImage(image_tag, docker_registry)
+    parser.add_argument("-c", "--checkout", required=False,
+        help="Git hash, tag or branch to checkout from the source repository")
 
-    # Generate CWL artifacts within the output directory.
-    if not os.path.exists(cwl_dir):
-        os.makedirs(cwl_dir)
+    parser.add_argument("--container_registry", required=False,
+        help="URL to a Docker registry for pushing of the built image")
 
-    nb = AppNB(repo)
-    files = nb.Generate(cwl_dir, dockerurl)
+    args = parser.parse_args()
 
-    return_code = 0
+    logging.basicConfig(level=logging.DEBUG)
 
-    return return_code
+    app_gen = UnityApplicationGenerator(args.source_repository, args.build_directory, args.checkout)
+
+    app_gen.create_docker_image()
+
+    if args.container_registry is not None:
+        docker_url = app_gen.push_to_docker_registry(args.container_registry)
+    else:
+        docker_url = app_gen.docker_util.image_tag
+
+    app_gen.create_cwl(docker_url)
+
+    app_gen.push_to_application_registry(None)
 
 if __name__ == '__main__':
-    ret = main(sys.argv)
+    main()

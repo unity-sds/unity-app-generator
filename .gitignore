@@ -1,5 +1,6 @@
 # Temporary files
 *.swp
+__pycache__
 
 # Build directory
 build/
