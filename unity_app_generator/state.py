@@ -41,7 +41,11 @@ class ApplicationState(object):
             raise ApplicationStateError(f"app_base_path must be supplied when state directory or store file does not already exist. State directory: {state_directory}, Store filename: {self.values_store_filename}")
 
         self.state_values["app_base_path"] = app_base_path
-        self.state_values["source_repository"] = source_repository
+
+        if os.path.exists(source_repository):
+            self.state_values["source_repository"] = os.path.realpath(source_repository)
+        else:
+            self.state_values["source_repository"] = source_repository
 
         # Default path
         self.cwl_output_path = os.path.join(self.state_directory, "cwl")

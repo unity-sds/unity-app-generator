@@ -73,7 +73,11 @@ def build_cwl(args):
     app_gen.create_cwl(cwl_output_path=args.cwl_output_path, docker_url=args.image_url)
 
 def push_app_registry(args):
-    pass
+    state_dir = check_state_directory(state_directory_path(args))
+
+    app_gen = UnityApplicationGenerator(state_dir)
+
+    app_gen.push_to_application_registry(args.dockstore_api_url, args.dockstore_token)
 
 def main():
     parser = ArgumentParser(description="Unity Application Package Generator")
@@ -118,7 +122,7 @@ def main():
 
     parser_push_docker.set_defaults(func=push_docker)
 
-    # create_cwl
+    # build_cwl
 
     parser_build_cwl = subparsers.add_parser('build_cwl',
         help=f"Create OGC compliant CWL files from the repository and Docker image")
@@ -130,6 +134,19 @@ def main():
         help="Docker image tag or remote registry URL to be included in the generated CWL files if not using the build_docker and/or push_docker subcommands") 
 
     parser_build_cwl.set_defaults(func=build_cwl)
+
+    # push_app_registry
+
+    parser_app_registry = subparsers.add_parser('push_app_registry',
+        help=f"Push CWL files to Dockstore application registry")
+
+    parser_app_registry.add_argument("--api_url", dest="dockstore_api_url", required=True,
+        help="Dockstore API URL including the trailing api/ portion of the URL") 
+
+    parser_app_registry.add_argument("--token", dest="dockstore_token", required=True,
+        help="Dockstore API token obtained from the My Services / Account page") 
+
+    parser_app_registry.set_defaults(func=push_app_registry)
 
     # Process arguments
 
