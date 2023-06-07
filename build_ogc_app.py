@@ -65,6 +65,15 @@ def push_docker(args):
     
     app_gen.push_to_docker_registry(args.container_registry, image_tag=args.image_tag)
 
+def notebook_parameters(args):
+
+    state_dir = check_state_directory(state_directory_path(args))
+
+    app_gen = UnityApplicationGenerator(state_dir)
+
+    print()
+    print(app_gen.notebook_parameters())
+
 def build_cwl(args):
     state_dir = check_state_directory(state_directory_path(args))
 
@@ -121,6 +130,13 @@ def main():
         help="Docker image tag to push into container registry if already built without using the build_docker subcommand")
 
     parser_push_docker.set_defaults(func=push_docker)
+
+    # notebook_parameters
+
+    parser_parameters = subparsers.add_parser('parameters',
+        help=f"Display parsed notebook parameters")
+
+    parser_parameters.set_defaults(func=notebook_parameters)
 
     # build_cwl
 

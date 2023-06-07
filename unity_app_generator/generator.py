@@ -95,9 +95,21 @@ step:
             os.makedirs(cwl_output_path)
 
         nb = AppNB(self.repo_info)
-        files = nb.Generate(cwl_output_path, docker_url)
+
+        logger.info("Parameters:\n" + nb.parameter_summary())
+
+        files = nb.generate_all(cwl_output_path, docker_url)
 
         self._generate_dockstore_cwl(cwl_output_path)
+
+    def notebook_parameters(self):
+
+        nb = AppNB(self.repo_info)
+
+        params_str = "Parsed Notebook Parameters:\n"
+        params_str += nb.parameter_summary()
+
+        return params_str
 
     def _find_existing_app(self, app_catalog, app_name):
 
