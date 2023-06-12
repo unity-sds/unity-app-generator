@@ -6,7 +6,7 @@ from glob import glob
 
 from .state import ApplicationState
 
-from app_pack_generator import GitManager, DockerUtil, AppNB
+from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook
 
 from unity_py.services.application_service import DockstoreAppCatalog
 
@@ -94,7 +94,7 @@ step:
         if not os.path.exists(cwl_output_path):
             os.makedirs(cwl_output_path)
 
-        nb = AppNB(self.repo_info)
+        nb = ApplicationNotebook(self.repo_info)
 
         logger.info("Parameters:\n" + nb.parameter_summary())
 
@@ -104,7 +104,7 @@ step:
 
     def notebook_parameters(self):
 
-        nb = AppNB(self.repo_info)
+        nb = ApplicationNotebook(self.repo_info)
 
         params_str = "Parsed Notebook Parameters:\n"
         params_str += nb.parameter_summary()
