@@ -1,2 +1,2 @@
 app_pack_generator @ git+https://github.com/unity-sds/app-pack-generator.git
-unity-py @ git+https://github.com/unity-sds/unity-py.git@mliukis_hosted_workflow
+unity-py @ git+https://github.com/unity-sds/unity-py.git@develop
