@@ -21,7 +21,7 @@ setup(
     scripts=["build_ogc_app.py"],
     install_requires=[
         "app_pack_generator @ git+https://github.com/unity-sds/app-pack-generator.git",
-        "unity-py @ git+https://github.com/unity-sds/unity-py.git@develop",
+        "unity-sds-client==0.1.2",
     ],
     classifiers=[
         "Development Status :: 1 - Planning",
