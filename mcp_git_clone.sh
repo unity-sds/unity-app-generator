@@ -1,10 +1,74 @@
 #!/bin/bash
 
+#=====================================================================
+#
+# The primary purpose of this tool is to clone in MCP GitLab an
+# existing remote repository, which is not already in MCP GitLab.
+# Currently (07/14/2023), git cannot directly clone a remote git
+# repository at another remote location; therefore, to do such a
+# cloning, this tool first clones the source remote repository in the
+# local system, where this tool is used, and then clones the local
+# repository at MCP GitLab.  However, this tool can behave in three
+# different major ways depending on the single optional positional
+# argument PATH.
+#
+# The single positional argument PATH can be one of the following:
+#   1) The URL of a remote git repository
+#   2) The path to a local subdirectory which is a git repo
+#   3) The path to a local subdirectory which is not a git repo
+# If the optional argument PATH is not provided, then it is assumed
+# to be the current working directory '.' in the local system.
+#
+# In the first case, this tool
+#   a) clones the remote git repo locally
+#   b) "disables" remote 'origin' push for the local repo
+#   c) clones the local copy of the repo in MCP GitLab
+#   d) creates remote 'mcp' push and fetch
+#
+# In the second case, this tool
+#   a) "disables" remote 'origin' push for the local repo, if
+#      remote 'origin' exists
+#   b) clones the local copy of the repo in MCP GitLab
+#   c) creates remote 'mcp' push and fetch
+#
+# In the third case, this tool
+#   a) converts the entire subdirectory and its contents into a
+#      git repo
+#   b) clones the local copy of the repo in MCP GitLab
+#   c) creates remote 'mcp' push and fetch
+# The user of this tool must delete all unwanted files rooted at
+# PATH before using this tool.
+#
+# Other non-positional arguments:
+#
+#   -b BRANCH is optional, has a default value of 'main' and is
+#      only used when PATH is a local subdirectory which is not a
+#      git repository.
+#
+#   -m MESSAGE is optional, has a default value of 'initial version'
+#      and is only used when PATH is a local subdirectory which is
+#      not a git repository.
+#
+#   -t TOKEN_NAME:TOKEN is colon ':' separated MCP GitLab user-ID
+#      and access token.  This is an optional MCP GitLab
+#      authentication method.
+#
+#   -p PIPELINE is optional and no action is taken if not used.  The
+#      primary purpose of this optional argument is to supply a
+#      pipeline YML file to the repository cloned in MCP GitLab.
+#      The argument should be a pipeline file (.gitlab-ci.yml) in
+#      the local system that the user would like to add it to the
+#      local repo before cloning the repo in MCP GitLab.
+#
+# WARNING: There is no strong error checking implemented yet.  There
+# are also no prompts to confirm the users actions yet.
+#
+
 
 # Prints usage message
 #
 usage() {
-  echo "Usage: $0 [ PATH ] [ -b BRANCH ] [ -m MESSAGE ] [ -t TOKEN_NAME:TOKEN ]" 1>&2 
+  echo "Usage: $0 [ PATH ] [ -b BRANCH ] [ -m MESSAGE ] [ -t TOKEN_NAME:TOKEN ] [ -p PIPELINE ]" 1>&2 
 }
 
 # This function is for error exit.
@@ -22,12 +86,13 @@ exit_abnormal() {
 branch="main"
 message="initial revision"
 tauthentication=""
+pipeline=""
 
 ipos=0
 while [ $# -gt 0 ]; do
     unset OPTIND
     unset OPTARG
-    while getopts hb:m:t: opt; do
+    while getopts hb:m:t:p: opt; do
        if [[ ${OPTARG} =~ ^-.*$ ]]; then
             echo "ERROR:  Option argument cannot start with '-'"
             exit_abnormal
@@ -37,6 +102,7 @@ while [ $# -gt 0 ]; do
             b) branch=${OPTARG};;
             m) message=${OPTARG};;
             t) tauthentication=${OPTARG};;
+            p) pipeline=${OPTARG};;
             *) echo "ERROR:  Unknown option."; exit_abnormal;;
         esac
     done
@@ -55,10 +121,11 @@ if [ -z $path ]; then
     path='.'
 fi
 
-echo "branch  '$branch'"
-echo "message '$message'"
-echo "token   '$tauthentication'"
-echo "path    '$path'"
+echo "branch   '$branch'"
+echo "message  '$message'"
+echo "token    '$tauthentication'"
+echo "pipeline '$pipeline'"
+echo "path     '$path'"
 
 
 #=============== Check if "$path" is a valid URL ===============
@@ -131,6 +198,21 @@ fi
 if [ ! -d $path ]; then
     echo "ERROR:  '$path' must be an existing directory!"
     exit_abnormal
+fi
+
+# If pipeline yml file provided, copy it to destination before cd.
+#
+ymlfn=""
+if [ ! -z $pipeline ]; then
+    if [ -f $pipeline ]; then
+        cp $pipeline $path
+        ymlfn=$(basename $pipeline)
+    else 
+        echo "ERROR:  $pipeline does not exist."
+        exit_abnormal
+    fi
+else
+    echo "INFO:  No pipeline YML file provided."
 fi
 
 cd $path
@@ -256,6 +338,19 @@ if [ -z "$result" ]; then
 
 else
     echo "INFO:  Remote '$name' already exists."
+fi
+
+
+#=============== Add pipeline YAML file if given. ===============
+
+if [ ! -z $ymlfn ]; then
+    if [ -f $ymlfn ]; then
+        git add $ymlfn
+        git commit -m "added pipeline yml file"
+    else 
+        echo "ERROR: '$ymlfn' should be a valid file at this point!  Coding error!"
+        exit_abnormal
+    fi
 fi
 
 
