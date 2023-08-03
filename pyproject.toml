@@ -1,0 +1,38 @@
+[build-system]
+requires = ["setuptools>=62.6.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unity_app_generator"
+authors = [ 
+    { name = "James McDuffie" },
+]
+description="Generates an OGC compliant Unity application package using the Unity app-pack-generator."
+readme = "README.md"
+keywords = ["unity-sds", "ogc", "packaging", "cwl", "jupyter"]
+license = { text = "Apache License" }
+
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Software Development :: Build Tools",
+    "Topic :: Utilities",
+]
+
+requires-python = ">=3.9"
+dynamic = ["dependencies", "version"]
+
+[tool.setuptools.dynamic]
+dependencies = {file = ["requirements.txt"]}
+version = {attr = "unity_app_generator.version.__version__"}
+
+[tool.setuptools.packages.find]
+where = ["."]
+
+[project.scripts]
+build_ogc_app = "unity_app_generator.__main__:main"

@@ -46,10 +46,10 @@ pip install unity-app-generator
 
 ## Usage
 
-Unity application generation is accomplished by using the `build_ogc_app.py` program. It uses a stateful architecture such as in other programs such as ``git`` where actions on a repository can be done in a series of steps. These steps are listed when running `build_ogc_app.py --help`.
+Unity application generation is accomplished by using the `build_ogc_app` program. It uses a stateful architecture such as in other programs such as ``git`` where actions on a repository can be done in a series of steps. These steps are listed when running `build_ogc_app --help`.
 
 ```
-usage: build_ogc_app.py [-h] [--state_directory STATE_DIRECTORY] {init,build_docker,push_docker,parameters,build_cwl,push_app_registry} ...
+usage: build_ogc_app [-h] [--state_directory STATE_DIRECTORY] {init,build_docker,push_docker,parameters,build_cwl,push_app_registry} ...
 
 Unity Application Package Generator
 
@@ -75,7 +75,7 @@ By default a state directory name `.unity_app_gen` is created in the repository 
 Before using the tool with a repository the state directory needs to be initialized:
 
 ```
-usage: build_ogc_app.py init [-h] [-c CHECKOUT] source_repository [destination_directory]
+usage: build_ogc_app init [-h] [-c CHECKOUT] source_repository [destination_directory]
 
 positional arguments:
   source_repository     Directory or Git URL of application source files, default is current directory
@@ -96,13 +96,13 @@ For example to initialize an repository and use it locally:
 ```
 git clone https://github.com/unity-sds/unity-example-application.git
 cd unity-example-application
-build_ogc_app.py init
+build_ogc_app init
 ```
 
 Or to have the tool clone and initialize the repository for you:
 
 ```
-build_ogc_app.py init https://github.com/unity-sds/unity-example-application.git unity-example-application
+build_ogc_app init https://github.com/unity-sds/unity-example-application.git unity-example-application
 cd unity-example-application
 ```
 
@@ -123,7 +123,7 @@ The `build_cwl` will use [app-pack-generator](https://github.com/unity-sds/app-p
 The `push_app_registry` command pushes the generated CWL into a Dockstore application registry server. It requires the the URL to the Dockstore API as well as a token obtained through the Dockstore interface. The `build_cwl` step is required to have already been executed.
 
 ```
-usage: build_ogc_app.py push_app_registry [-h] --api_url DOCKSTORE_API_URL --token DOCKSTORE_TOKEN
+usage: build_ogc_app push_app_registry [-h] --api_url DOCKSTORE_API_URL --token DOCKSTORE_TOKEN
 
 options:
   -h, --help            show this help message and exit

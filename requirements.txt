@@ -1,2 +1,2 @@
-app_pack_generator @ git+https://github.com/unity-sds/app-pack-generator.git
+app_pack_generator>=0.2.2
 unity-sds-client==0.1.2
