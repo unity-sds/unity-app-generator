@@ -6,7 +6,7 @@ from glob import glob
 
 from .state import ApplicationState
 
-from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook
+from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook, CWL, Descriptor
 
 from unity_py.services.application_service import DockstoreAppCatalog
 
@@ -93,12 +93,18 @@ step:
 
         if not os.path.exists(cwl_output_path):
             os.makedirs(cwl_output_path)
+    
+        notebook_filename = os.path.join(self.repo_info.directory, "process.ipynb")
 
-        nb = ApplicationNotebook(self.repo_info)
+        app = ApplicationNotebook(notebook_filename)
 
-        logger.info("Parameters:\n" + nb.parameter_summary())
+        logger.info("Parameters:\n" + app.parameter_summary())
 
-        files = nb.generate_all(cwl_output_path, docker_url)
+        cwl = CWL(app)
+        desc = Descriptor(app, self.repo_info)
+
+        files = cwl.generate_all(cwl_output_path, docker_url)
+        files.append(desc.generate_descriptor(cwl_output_path, docker_url))
 
         self._generate_dockstore_cwl(cwl_output_path)
 
