@@ -8,7 +8,7 @@ from .state import ApplicationState
 
 from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook, CWL, Descriptor
 
-from unity_py.services.application_service import DockstoreAppCatalog
+from unity_sds_client.services.application_service import DockstoreAppCatalog
 
 logger = logging.getLogger(__name__)
 
