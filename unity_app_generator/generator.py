@@ -17,7 +17,7 @@ class ApplicationGenerationError(Exception):
 
 class UnityApplicationGenerator(object):
 
-    def __init__(self, state_directory, source_repository=None, destination_directory=None, checkout=None):
+    def __init__(self, state_directory, source_repository=None, destination_directory=None, checkout=None, use_owner=True):
 
         if not ApplicationState.exists(state_directory):
             self.repo_info = self._localize_source(source_repository, destination_directory, checkout)
@@ -26,7 +26,7 @@ class UnityApplicationGenerator(object):
             self.app_state = ApplicationState(state_directory)
             self.repo_info = self._localize_source(self.app_state.source_repository, self.app_state.app_base_path, checkout)
 
-        self.docker_util = DockerUtil(self.repo_info, do_prune=False)
+        self.docker_util = DockerUtil(self.repo_info, do_prune=False, use_owner=use_owner)
 
     def _localize_source(self, source, dest, checkout):
 

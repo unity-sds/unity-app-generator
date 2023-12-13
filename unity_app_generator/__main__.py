@@ -54,7 +54,7 @@ def init(args):
 def build_docker(args):
     state_dir = check_state_directory(state_directory_path(args))
 
-    app_gen = UnityApplicationGenerator(state_dir)
+    app_gen = UnityApplicationGenerator(state_dir, use_owner=args.use_owner)
 
     app_gen.create_docker_image()
 
@@ -115,6 +115,9 @@ def main():
 
     parser_build_docker = subparsers.add_parser('build_docker',
         help=f"Build a Docker image from the initialized application directory")
+
+    parser_build_docker.add_argument("--no_owner", dest="use_owner", action="store_false", default=True,
+        help="Disable using the owner of the Git repository in the Docker image tag")
 
     parser_build_docker.set_defaults(func=build_docker)
 
