@@ -7,7 +7,7 @@ from glob import glob
 from .state import ApplicationState
 
 from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook
-from app_pack_generator import ProcessCWL, BundledDataStagingCWL, Descriptor
+from app_pack_generator import ProcessCWL, DataStagingCWL, Descriptor
 
 from unity_sds_client.services.application_service import DockstoreAppCatalog
 
@@ -101,17 +101,22 @@ step:
         app = ApplicationNotebook(notebook_filename)
 
         logger.info("Parameters:\n" + app.parameter_summary())
+            
+        # Create CWL files depending on the mode of production
+        cwl_generators = [ ProcessCWL(app) ]
 
         if monolithic:
-            cwl = BundledDataStagingCWL(app)
-        else:
-            cwl = ProcessCWL(app)
+            cwl_generators.append( DataStagingCWL(app) )
 
+        files_created = []
+        for cwl_gen in cwl_generators:
+            files_created += cwl_gen.generate_all(cwl_output_path, dockerurl=docker_url)
+        
+        # Add the JSON descriptor file
         desc = Descriptor(app, self.repo_info)
+        files_created.append(desc.generate_descriptor(cwl_output_path, docker_url))
 
-        files = cwl.generate_all(cwl_output_path, dockerurl=docker_url)
-        files.append(desc.generate_descriptor(cwl_output_path, docker_url))
-
+        # Add Dockstore.cwl, point it to the appropriate entry point
         if monolithic:
             self._generate_dockstore_cwl(cwl_output_path, "workflow.cwl")
         else:
