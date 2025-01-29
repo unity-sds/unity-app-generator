@@ -1,2 +1,2 @@
-app_pack_generator>=0.4.3
-unity-sds-client==0.2.0
+app_pack_generator>=1.0.0
+unity-sds-client>=0.2.0
