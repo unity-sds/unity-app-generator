@@ -79,7 +79,7 @@ def build_cwl(args):
 
     app_gen = UnityApplicationGenerator(state_dir)
 
-    app_gen.create_cwl(cwl_output_path=args.cwl_output_path, docker_url=args.image_url)
+    app_gen.create_cwl(cwl_output_path=args.cwl_output_path, docker_url=args.image_url, monolithic=args.monolithic)
 
 def push_app_registry(args):
     state_dir = check_state_directory(state_directory_path(args))
@@ -151,6 +151,9 @@ def main():
 
     parser_build_cwl.add_argument("-u", "--image_url", 
         help="Docker image tag or remote registry URL to be included in the generated CWL files if not using the build_docker and/or push_docker subcommands") 
+
+    parser_build_cwl.add_argument("--monolithic", action="store_true",
+        help="Use the deprecated 'monolithic' approach to generating CWL where stage in and out are bundled inside the application")
 
     parser_build_cwl.set_defaults(func=build_cwl)
 

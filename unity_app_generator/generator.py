@@ -6,7 +6,8 @@ from glob import glob
 
 from .state import ApplicationState
 
-from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook, CWL, Descriptor
+from app_pack_generator import GitManager, DockerUtil, ApplicationNotebook
+from app_pack_generator import ProcessCWL, DataStagingCWL, Descriptor
 
 from unity_sds_client.services.application_service import DockstoreAppCatalog
 
@@ -55,9 +56,9 @@ class UnityApplicationGenerator(object):
         # Push to remote repository
         self.app_state.docker_url = self.docker_util.push_image(docker_registry, self.app_state.docker_image_tag)
 
-    def _generate_dockstore_cwl(self, cwl_output_path):
+    def _generate_dockstore_cwl(self, cwl_output_path, target_cwl_filename):
 
-        template = """
+        template = f"""
 cwlVersion: v1.0
 
 class: Workflow
@@ -66,14 +67,15 @@ doc: |
 
 steps:
 step:
-    run: workflow.cwl
+    run: {target_cwl_filename}
 """
+        
         # Hard code file name because it is a hard coded re
         dockstore_cwl_filename = os.path.join(cwl_output_path, "Dockstore.cwl")
         with open(dockstore_cwl_filename, "w") as cwl_file:
             cwl_file.write(template.lstrip())
 
-    def create_cwl(self, cwl_output_path=None, docker_url=None):
+    def create_cwl(self, cwl_output_path=None, docker_url=None, monolithic=False):
 
         # Fall through using docker_image_tag if docker_url does not exist because no push has occurred
         # Or if docker_url is supplied as an argument use that
@@ -99,14 +101,26 @@ step:
         app = ApplicationNotebook(notebook_filename)
 
         logger.info("Parameters:\n" + app.parameter_summary())
+            
+        # Create CWL files depending on the mode of production
+        cwl_generators = [ ProcessCWL(app) ]
 
-        cwl = CWL(app)
+        if monolithic:
+            cwl_generators.append( DataStagingCWL(app) )
+
+        files_created = []
+        for cwl_gen in cwl_generators:
+            files_created += cwl_gen.generate_all(cwl_output_path, dockerurl=docker_url)
+        
+        # Add the JSON descriptor file
         desc = Descriptor(app, self.repo_info)
+        files_created.append(desc.generate_descriptor(cwl_output_path, docker_url))
 
-        files = cwl.generate_all(cwl_output_path, docker_url)
-        files.append(desc.generate_descriptor(cwl_output_path, docker_url))
-
-        self._generate_dockstore_cwl(cwl_output_path)
+        # Add Dockstore.cwl, point it to the appropriate entry point
+        if monolithic:
+            self._generate_dockstore_cwl(cwl_output_path, "workflow.cwl")
+        else:
+            self._generate_dockstore_cwl(cwl_output_path, "process.cwl")
 
     def notebook_parameters(self):
 
