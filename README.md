@@ -26,22 +26,15 @@
 
 ## Requirements
 
-* [app-pack-generator](https://github.com/unity-sds/app-pack-generator)
+* [app-pack-generator](https://pypi.org/project/app-pack-generator/)
 * [Unity-py](https://pypi.org/project/unity-sds-client/)
 
 ## Setup Instructions
 
-### Install from Github
+### Install from PyPi
 
 ```
-pip install git+https://github.com/unity-sds/unity-app-generator.git 
-```
-
-### Install Locally
-
-```
-git clone https://github.com/unity-sds/unity-app-generator.git
-pip install unity-app-generator
+pip install mdps-app-generator
 ```
 
 ## Usage

@@ -8,3 +8,6 @@ build/
 
 # Virtual Environment
 env/
+
+# PyPi distribution files 
+dist/
