@@ -3,7 +3,7 @@ requires = ["setuptools>=62.6.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "unity_app_generator"
+name = "mdps_app_generator"
 authors = [ 
     { name = "James McDuffie" },
 ]
