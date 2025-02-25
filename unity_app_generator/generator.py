@@ -19,8 +19,8 @@ class ApplicationGenerationError(Exception):
 
 class UnityApplicationGenerator(object):
 
-    def __init__(self, state_directory, source_repository=None, destination_directory=None, checkout=None, 
-                 use_namespace=None, use_repository=None, use_tag=None):
+    def __init__(self, state_directory, source_repository=None, destination_directory=None, checkout=None,
+                 repo2docker_config=None, use_namespace=None, use_repository=None, use_tag=None):
 
         if not ApplicationState.exists(state_directory):
             self.repo_info = self._localize_source(source_repository, destination_directory, checkout)
@@ -35,6 +35,7 @@ class UnityApplicationGenerator(object):
         image_tag = use_tag if use_tag is not None else self.app_state.docker_image_tag
 
         self.docker_util = DockerUtil(self.repo_info, do_prune=False,
+                                      repo_config=repo2docker_config,
                                       use_namespace=image_namespace,
                                       use_repository=image_repository,
                                       use_tag=image_tag)
