@@ -54,7 +54,10 @@ def init(args):
 def build_docker(args):
     state_dir = check_state_directory(state_directory_path(args))
 
-    app_gen = UnityApplicationGenerator(state_dir, use_owner=args.use_owner)
+    app_gen = UnityApplicationGenerator(state_dir,
+                                        use_namespace=args.image_namespace,
+                                        use_repository=args.image_repository,
+                                        use_tag=args.image_tag)
 
     app_gen.create_docker_image()
 
@@ -62,8 +65,15 @@ def push_docker(args):
     state_dir = check_state_directory(state_directory_path(args))
 
     app_gen = UnityApplicationGenerator(state_dir)
-    
-    app_gen.push_to_docker_registry(args.container_registry, image_tag=args.image_tag)
+
+    app_gen.push_to_docker_registry(args.container_registry)
+
+def push_ecr(args):
+    state_dir = check_state_directory(state_directory_path(args))
+
+    app_gen = UnityApplicationGenerator(state_dir)
+
+    app_gen.push_to_aws_ecr()
 
 def notebook_parameters(args):
 
@@ -94,6 +104,9 @@ def main():
     parser.add_argument("--state_directory",
         help=f"An alternative location to store the application state other than {STATE_DIRECTORY}")
 
+    parser.add_argument("--verbose", "-v", action="store_true", default=False,
+        help=f"Enable verbose logging")
+
     # init
     subparsers = parser.add_subparsers(required=True)
 
@@ -116,8 +129,14 @@ def main():
     parser_build_docker = subparsers.add_parser('build_docker',
         help=f"Build a Docker image from the initialized application directory")
 
-    parser_build_docker.add_argument("--no_owner", dest="use_owner", action="store_false", default=True,
-        help="Disable using the owner of the Git repository in the Docker image tag")
+    parser_build_docker.add_argument("-n", "--image_namespace", 
+        help="Docker image namespace to use instead of the automatically generated one from the Git repository owner. An empty string removes the namespace from the image reference.")
+
+    parser_build_docker.add_argument("-r", "--image_repository", 
+        help="Docker image repository to use instead of the automatically generated one from the Git repository name.")
+
+    parser_build_docker.add_argument("-t", "--image_tag", 
+        help="Docker image tag to use instead of the automatically generated one from the Git commit id")
 
     parser_build_docker.set_defaults(func=build_docker)
 
@@ -129,10 +148,14 @@ def main():
     parser_push_docker.add_argument("container_registry", 
         help="URL or Dockerhub username of a Docker registry for pushing of the built image")
 
-    parser_push_docker.add_argument("-t", "--image_tag", 
-        help="Docker image tag to push into container registry if already built without using the build_docker subcommand")
-
     parser_push_docker.set_defaults(func=push_docker)
+
+    # push_ecr
+
+    parser_push_ecr = subparsers.add_parser('push_ecr',
+        help=f"Push a Docker image from the initialized application directory to an AWS Elastic Container Registry (ECR)")
+
+    parser_push_ecr.set_defaults(func=push_ecr)
 
     # notebook_parameters
 
@@ -174,7 +197,10 @@ def main():
 
     args = parser.parse_args()
 
-    logging.basicConfig(level=logging.DEBUG)
+    if args.verbose:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
 
     try:
         args.func(args)

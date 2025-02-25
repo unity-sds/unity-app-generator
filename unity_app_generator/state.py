@@ -17,7 +17,10 @@ class ApplicationState(object):
         "cwl_output_path": "",
 
         "source_repository": None,
+        "docker_image_namespace": None,
+        "docker_image_repository": None,
         "docker_image_tag": None,
+        "docker_image_reference": None,
         "docker_url": None,
         "app_registry_id": None,
     }
