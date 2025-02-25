@@ -147,7 +147,9 @@ step:
 
     def notebook_parameters(self):
 
-        nb = ApplicationNotebook(self.repo_info)
+        notebook_filename = os.path.join(self.repo_info.directory, "process.ipynb")
+
+        nb = ApplicationNotebook(notebook_filename)
 
         params_str = "Parsed Notebook Parameters:\n"
         params_str += nb.parameter_summary()

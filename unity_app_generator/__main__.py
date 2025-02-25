@@ -13,97 +13,20 @@
 # * Creates CWL files from application metadata and Docker registry URL
 # * Register application and pushes CWL files into Dockstore
 
-STATE_DIRECTORY = ".unity_app_gen"
-
-import os
 import logging
 from argparse import ArgumentParser
 
-from unity_app_generator.generator import UnityApplicationGenerator, ApplicationGenerationError
+from unity_app_generator.generator import ApplicationGenerationError
+
+from . import interface
 
 logger = logging.getLogger()
-
-class SubCommandError(Exception):
-    pass
-
-def state_directory_path(args):
-
-    if args.state_directory is not None:
-        return os.path.realpath(args.state_directory)
-
-    if hasattr(args, "destination_directory") and args.destination_directory is not None:
-        return os.path.realpath(os.path.join(args.destination_directory, STATE_DIRECTORY))
-
-    if hasattr(args, "source_repository") and os.path.isdir(args.source_repository):
-        return os.path.realpath(os.path.join(args.source_repository, STATE_DIRECTORY))
-
-    return os.path.realpath(os.path.join(os.curdir, STATE_DIRECTORY))
-
-def check_state_directory(state_dir):
-
-    if not os.path.exists(state_dir):
-        raise SubCommandError(f"Application state directory {state_dir} does not exist, please run init sub-command first")
-
-    return state_dir
-
-def init(args):
-    state_dir = state_directory_path(args)
-
-    app_gen = UnityApplicationGenerator(state_dir, args.source_repository, args.destination_directory, args.checkout)
-
-def build_docker(args):
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir,
-                                        repo2docker_config=args.config_file,
-                                        use_namespace=args.image_namespace,
-                                        use_repository=args.image_repository,
-                                        use_tag=args.image_tag)
-
-    app_gen.create_docker_image()
-
-def push_docker(args):
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir)
-
-    app_gen.push_to_docker_registry(args.container_registry)
-
-def push_ecr(args):
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir)
-
-    app_gen.push_to_aws_ecr()
-
-def notebook_parameters(args):
-
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir)
-
-    print()
-    print(app_gen.notebook_parameters())
-
-def build_cwl(args):
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir)
-
-    app_gen.create_cwl(cwl_output_path=args.cwl_output_path, docker_url=args.image_url, monolithic=args.monolithic)
-
-def push_app_registry(args):
-    state_dir = check_state_directory(state_directory_path(args))
-
-    app_gen = UnityApplicationGenerator(state_dir)
-
-    app_gen.push_to_application_registry(args.dockstore_api_url, args.dockstore_token)
 
 def main():
     parser = ArgumentParser(description="Unity Application Package Generator")
 
     parser.add_argument("--state_directory",
-        help=f"An alternative location to store the application state other than {STATE_DIRECTORY}")
+        help=f"An alternative location to store the application state other than {interface.DEFAULT_STATE_DIRECTORY}")
 
     parser.add_argument("--verbose", "-v", action="store_true", default=False,
         help=f"Enable verbose logging")
@@ -112,9 +35,9 @@ def main():
     subparsers = parser.add_subparsers(required=True)
 
     parser_init = subparsers.add_parser('init',
-        help=f"Initialize a Git repository for use by this application. Creates a {STATE_DIRECTORY} directory in the destination directory")
+        help=f"Initialize a Git repository for use by this application. Creates a {interface.DEFAULT_STATE_DIRECTORY} directory in the destination directory")
 
-    parser_init.add_argument("source_repository", 
+    parser_init.add_argument("source_repository",
         help="Directory or Git URL of application source files, default is current directory")
 
     parser_init.add_argument("destination_directory", nargs="?",
@@ -123,7 +46,7 @@ def main():
     parser_init.add_argument("-c", "--checkout", required=False,
         help="Git hash, tag or branch to checkout from the source repository")
 
-    parser_init.set_defaults(func=init)
+    parser_init.set_defaults(func=interface.init)
 
     # build_docker
 
@@ -142,7 +65,7 @@ def main():
     parser_build_docker.add_argument("-c", "--config_file",
         help="JSON or Python Traitlets style config file for repo2docker. Use 'repo2docker --help-all' to see configurable options.")
 
-    parser_build_docker.set_defaults(func=build_docker)
+    parser_build_docker.set_defaults(func=interface.build_docker)
 
     # push_docker
 
@@ -152,21 +75,21 @@ def main():
     parser_push_docker.add_argument("container_registry", 
         help="URL or Dockerhub username of a Docker registry for pushing of the built image")
 
-    parser_push_docker.set_defaults(func=push_docker)
+    parser_push_docker.set_defaults(func=interface.push_docker)
 
     # push_ecr
 
     parser_push_ecr = subparsers.add_parser('push_ecr',
         help=f"Push a Docker image from the initialized application directory to an AWS Elastic Container Registry (ECR)")
 
-    parser_push_ecr.set_defaults(func=push_ecr)
+    parser_push_ecr.set_defaults(func=interface.push_ecr)
 
     # notebook_parameters
 
     parser_parameters = subparsers.add_parser('parameters',
         help=f"Display parsed notebook parameters")
 
-    parser_parameters.set_defaults(func=notebook_parameters)
+    parser_parameters.set_defaults(func=interface.notebook_parameters)
 
     # build_cwl
 
@@ -182,7 +105,7 @@ def main():
     parser_build_cwl.add_argument("--monolithic", action="store_true",
         help="Use the deprecated 'monolithic' approach to generating CWL where stage in and out are bundled inside the application")
 
-    parser_build_cwl.set_defaults(func=build_cwl)
+    parser_build_cwl.set_defaults(func=interface.build_cwl)
 
     # push_app_registry
 
@@ -195,7 +118,7 @@ def main():
     parser_app_registry.add_argument("--token", dest="dockstore_token", required=True,
         help="Dockstore API token obtained from the My Services / Account page") 
 
-    parser_app_registry.set_defaults(func=push_app_registry)
+    parser_app_registry.set_defaults(func=interface.push_app_registry)
 
     # Process arguments
 
@@ -207,12 +130,9 @@ def main():
         logging.basicConfig(level=logging.INFO)
 
     try:
-        args.func(args)
-    except (SubCommandError, ApplicationGenerationError) as err:
+        args.func(**vars(args))
+    except ApplicationGenerationError as err:
         parser.error(err)
-
-
-    #app_gen.push_to_application_registry(None)
 
 if __name__ == '__main__':
     main()
