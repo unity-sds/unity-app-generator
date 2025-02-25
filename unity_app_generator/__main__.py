@@ -55,6 +55,7 @@ def build_docker(args):
     state_dir = check_state_directory(state_directory_path(args))
 
     app_gen = UnityApplicationGenerator(state_dir,
+                                        repo2docker_config=args.config_file,
                                         use_namespace=args.image_namespace,
                                         use_repository=args.image_repository,
                                         use_tag=args.image_tag)
@@ -137,6 +138,9 @@ def main():
 
     parser_build_docker.add_argument("-t", "--image_tag", 
         help="Docker image tag to use instead of the automatically generated one from the Git commit id")
+
+    parser_build_docker.add_argument("-c", "--config_file",
+        help="JSON or Python Traitlets style config file for repo2docker. Use 'repo2docker --help-all' to see configurable options.")
 
     parser_build_docker.set_defaults(func=build_docker)
 
