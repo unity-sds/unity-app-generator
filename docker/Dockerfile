@@ -1,29 +1,21 @@
-FROM docker:latest
+FROM docker:27.4.0-dind
 
+# Install dependencies like python and pip
+RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
+RUN apk add gcc musl-dev linux-headers python3-dev
+RUN apk add --no-cache python3 py3-pip
+RUN apk add vim
 
-# Input arguments from the user 
-ARG SOURCE_REPO
-ARG DOCKSTORE_API_URL="http://awslbdockstorestack-lb-1429770210.us-west-2.elb.amazonaws.com:9998/api"
-ARG DOCKER_USERNAME
-ARG MDPS_APP_GEN_VERSION=1.0.0
+# install CWL libraries
+RUN mkdir /usr/share/apg \
+    && cd /usr/share/apg \
+    && python -m venv venv \
+    && source venv/bin/activate \
+    && pip install mdps-app-generator
 
-# Get the dockstore token and docker password from secrets 
-RUN --mount=type=secret,id=dockstore_token,env=DOCKSTORE_TOKEN \
-    --mount=type=secret,id=docker_password,env=DOCKER_PASSWORD
+RUN pwd
 
-RUN python3 -m venv venv
-RUN . venv/bin/activate && pip install mdps-app-generator==$MDPS_APP_GEN_VERSION
-#RUN pip install mdps-app-generator==$MDPS_APP_GEN_VERSION
-
-RUN docker login --username ${DOCKER_USERNAME} --password $DOCKER_PASSWORD
-
-RUN . venv/bin/activate && build_ogc_app init $SOURCE_REPO alg-source-repo
-# check this line is right 
-RUN cd alg-source-repo
-# make sure this works right 
-RUN if [ "$MDPS_APP_GEN_VERSION" = 1.0.0 ]; then echo "version was 1.0.0" ; else echo "version was not 1.0.0"
-
-RUN . venv/bin/activate && if [ "$MDPS_APP_GEN_VERSION" = 1.0.0 ]; then build_ogc_app build_docker --no_owner ; else build_ogc_app build_docker --image_namespace ""
-RUN . venv/bin/activate && build_ogc_app push_docker $DOCKER_USERNAME
-RUN . venv/bin/activate && build_ogc_app build_cwl
-RUN . venv/bin/activate && build_ogc_app push_app_registry --api_url $DOCKSTORE_API_URL --token $DOCKSTORE_TOKEN
+COPY docker/docker_apg_entrypoint.sh /usr/share/apg/docker_apg_entrypoint.sh
+WORKDIR /usr/share/apg
+RUN chmod +x /usr/share/apg/docker_apg_entrypoint.sh
+ENTRYPOINT ["/usr/share/apg/docker_apg_entrypoint.sh"]
