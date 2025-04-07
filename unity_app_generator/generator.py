@@ -46,7 +46,7 @@ class UnityApplicationGenerator(object):
         git_mgr = GitManager(source, dest)
     
         if checkout is not None:
-            logger.info(f"Checking out {checkout} in {repo_dir}")
+            logger.info(f"Checking out {checkout} in {dest}")
             git_mgr.checkout(checkout)
 
         return git_mgr
