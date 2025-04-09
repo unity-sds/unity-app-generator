@@ -252,7 +252,7 @@ appgen_task = KubernetesPodOperator(
     in_cluster=True,
     get_logs=True,
     startup_timeout_seconds=600,
-    cmds=["sh", "export DOCKERHUB_USERNAME=test"],
+    cmds=["export DOCKERHUB_USERNAME=test"],
     arguments=[
         "-r",
         "{{ params.repository }}",

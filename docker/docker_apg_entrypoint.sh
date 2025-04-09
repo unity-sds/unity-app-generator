@@ -1,5 +1,4 @@
 #!/bin/sh
-printenv
 
 echo "starting docker"
 # Start Docker engine
