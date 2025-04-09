@@ -34,7 +34,7 @@ CONTAINER_RESOURCES = k8s.V1ResourceRequirements(
     }
 )
 
-# SSM keys for credentials parameters
+# AWS SSM parameter paths for credentials 
 DOCKERHUB_USERNAME = "/unity/ads/app_gen/development/dockerhub_username"
 DOCKERHUB_TOKEN = "/unity/ads/app_gen/development/dockerhub_api_key"
 DOCKSTORE_TOKEN = "/unity/ads/app_gen/development/dockstore_token"
@@ -123,7 +123,7 @@ def build_ec2_type_label(key):
 LOG_LEVEL_TYPE = {10: "DEBUG", 20: "INFO"}
 
 # Change this to the Docker image that contains the Application Package Generator
-DOCKER_IMAGE = "jplmdps/unity-app-gen:latest"
+DOCKER_IMAGE = "jplmdps/unity-app-gen:v1.0.0"
 
 # Default DAG configuration
 dag_default_args = {
@@ -167,7 +167,6 @@ dag = DAG(
     },
 )
 
-# graceal change these names later to all be consistent, will have to change docker image too 
 app_gen_env_vars = [
     k8s.V1EnvVar(name="DOCKERHUB_USERNAME", value="{{ ti.xcom_pull(task_ids='Setup', key='dockerhub_username') }}"),
     k8s.V1EnvVar(name="DOCKERHUB_TOKEN", value= "{{ ti.xcom_pull(task_ids='Setup', key='dockerhub_token') }}"),

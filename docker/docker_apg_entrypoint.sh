@@ -13,7 +13,6 @@ do
   cat dockerd-logfile 
 done
 
-echo "activating python environment"
 . /usr/share/apg/venv/bin/activate
 
 echo $DOCKERHUB_TOKEN | docker login --username $DOCKERHUB_USERNAME --password-stdin
