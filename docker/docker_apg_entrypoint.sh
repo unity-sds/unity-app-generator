@@ -15,6 +15,9 @@ done
 
 . /usr/share/apg/venv/bin/activate
 
+echo "dockerhub username is"
+echo $DOCKERHUB_USERNAME
+
 echo $DOCKERHUB_TOKEN | docker login --username $DOCKERHUB_USERNAME --password-stdin
 
 build_ogc_app init $GITHUB_REPO build

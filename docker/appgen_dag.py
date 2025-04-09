@@ -123,7 +123,7 @@ def build_ec2_type_label(key):
 LOG_LEVEL_TYPE = {10: "DEBUG", 20: "INFO"}
 
 # Change this to the Docker image that contains the Application Package Generator
-DOCKER_IMAGE = "jplmdps/unity-app-gen:v1.0.0"
+DOCKER_IMAGE = "jplmdps/unity-app-gen:latest"
 
 # Default DAG configuration
 dag_default_args = {
@@ -245,13 +245,14 @@ appgen_task = KubernetesPodOperator(
     retries=1,
     task_id="appgen_task",
     namespace=POD_NAMESPACE,
-    env_vars=app_gen_env_vars,
+    # env_vars=app_gen_env_vars,
     name="appgen-task-pod",
     image=DOCKER_IMAGE,
     service_account_name="airflow-worker",
     in_cluster=True,
     get_logs=True,
     startup_timeout_seconds=600,
+    cmds=["sh", "export DOCKERHUB_USERNAME=test"],
     arguments=[
         "-r",
         "{{ params.repository }}",
