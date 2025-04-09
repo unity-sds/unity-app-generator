@@ -1,6 +1,5 @@
 #!/bin/sh
 
-echo "starting docker"
 # Start Docker engine
 dockerd &> dockerd-logfile &
 
@@ -14,14 +13,11 @@ done
 
 . /usr/share/apg/venv/bin/activate
 
-echo "dockerhub username is"
-echo $DOCKERHUB_USERNAME
-
+# This will not display the token to the logs 
 echo $DOCKERHUB_TOKEN | docker login --username $DOCKERHUB_USERNAME --password-stdin
 
 build_ogc_app init $GITHUB_REPO build
 cd build
-# unset DOCKER_HOST
 build_ogc_app build_docker --no_owner
 
 build_ogc_app push_docker $DOCKERHUB_USERNAME 
