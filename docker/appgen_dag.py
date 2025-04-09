@@ -123,7 +123,7 @@ def build_ec2_type_label(key):
 LOG_LEVEL_TYPE = {10: "DEBUG", 20: "INFO"}
 
 # Change this to the Docker image that contains the Application Package Generator
-DOCKER_IMAGE = "gllewellyn19/unity-app-gen:latest"
+DOCKER_IMAGE = "jplmdps/unity-app-gen:latest"
 
 # Default DAG configuration
 dag_default_args = {
