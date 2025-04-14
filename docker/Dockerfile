@@ -6,7 +6,7 @@ RUN apk add gcc musl-dev linux-headers python3-dev
 RUN apk add --no-cache python3 py3-pip
 RUN apk add vim
 
-# install CWL libraries
+# install mdps library
 RUN mkdir /usr/share/apg \
     && cd /usr/share/apg \
     && python -m venv venv \

@@ -22,7 +22,7 @@ build_ogc_app build_docker --no_owner
 
 build_ogc_app push_docker $DOCKERHUB_USERNAME 
 build_ogc_app build_cwl
-build_ogc_app push_app_registry --api_url http://awslbdockstorestack-lb-1429770210.us-west-2.elb.amazonaws.com:9998/api --token $DOCKSTORE_TOKEN 
+build_ogc_app push_app_registry --api_url $DOCKSTORE_API_URL --token $DOCKSTORE_TOKEN 
 
 deactivate
 
