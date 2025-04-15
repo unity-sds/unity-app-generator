@@ -11,7 +11,7 @@ RUN mkdir /usr/share/apg \
     && cd /usr/share/apg \
     && python -m venv venv \
     && source venv/bin/activate \
-    && pip install mdps-app-generator==1.0.0
+    && pip install mdps-app-generator==1.1.1
 
 RUN pwd
 

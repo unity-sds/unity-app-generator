@@ -18,7 +18,7 @@ echo $DOCKERHUB_TOKEN | docker login --username $DOCKERHUB_USERNAME --password-s
 
 build_ogc_app init $GITHUB_REPO build
 cd build
-build_ogc_app build_docker --no_owner
+build_ogc_app build_docker --image_namespace ""
 
 build_ogc_app push_docker $DOCKERHUB_USERNAME 
 build_ogc_app build_cwl
