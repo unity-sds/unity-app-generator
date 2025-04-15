@@ -14,11 +14,14 @@ logger = logging.getLogger()
 # Defaulty name of place where application generation state data is kept
 DEFAULT_STATE_DIRECTORY = ".unity_app_gen"
 
-def state_directory_path(state_directory=None):
+def state_directory_path(state_directory=None, destination_directory=None):
     "Resolve a path to the state directory based on which arguments are provided"
 
     if state_directory is not None:
         return os.path.realpath(state_directory)
+    
+    if destination_directory is not None:
+        return os.path.realpath(os.path.join(destination_directory, DEFAULT_STATE_DIRECTORY))
 
     return os.path.realpath(os.path.join(os.curdir, DEFAULT_STATE_DIRECTORY))
 
@@ -33,7 +36,7 @@ def check_state_directory(state_dir):
 def init(state_directory, source_repository, destination_directory=None, checkout=None, **kwargs):
     "Initialize a Git repository for use by subsequent commands"
 
-    state_dir = state_directory_path(state_directory)
+    state_dir = state_directory_path(state_directory, destination_directory)
 
     app_gen = UnityApplicationGenerator(state_dir, source_repository, destination_directory, checkout)
 
