@@ -1,5 +1,7 @@
 #!/bin/sh
 
+set -e
+
 # Start Docker engine
 dockerd &> dockerd-logfile &
 
